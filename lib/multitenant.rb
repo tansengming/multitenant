@@ -25,8 +25,12 @@ module Multitenant
       before_validation Proc.new {|m|
         m.send("#{association}=".to_sym, Multitenant.current_tenant) if multitenantable.call
       }, :on => :create
-      default_scope lambda {
-        where({reflection.foreign_key => Multitenant.current_tenant.id}) if multitenantable.call
+      default_scope {
+        if multitenantable.call
+          where({reflection.foreign_key => Multitenant.current_tenant.id})
+        else
+          unscoped
+        end
       }
     end
   end
